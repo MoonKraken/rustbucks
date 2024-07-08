@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use fixed::types::I32F32;
 use sha2::Digest;
 use sha2::Sha256;
 
@@ -32,7 +33,7 @@ impl Blockchain {
         let genesis_transaction = Transaction {
             sender: "".to_string(),
             receiver: "".to_string(),
-            amount: 0,
+            amount: I32F32::from_num(0.0),
             timestamp,
         };
 
@@ -110,6 +111,8 @@ impl Blockchain {
 
 #[cfg(test)]
 mod test {
+    use fixed::types::I32F32;
+
     use crate::model::{block::Block, blockchain::BlockchainError, transaction::Transaction};
 
     use super::Blockchain;
@@ -124,7 +127,7 @@ mod test {
                 sender: "Billy".to_string(),
                 receiver: "Timmy".to_string(),
                 timestamp: 0,
-                amount: 1,
+                amount: I32F32::from_num(1),
             }],
             timestamp: 0,
         };
@@ -146,7 +149,7 @@ mod test {
                 sender: "Billy".to_string(),
                 receiver: "Timmy".to_string(),
                 timestamp: 0,
-                amount: 1,
+                amount: I32F32::from_num(1),
             }],
             timestamp: 0,
         };
@@ -168,7 +171,7 @@ mod test {
                 sender: "me".to_string(),
                 receiver: "you".to_string(),
                 timestamp: 0,
-                amount: 50,
+                amount: I32F32::from_num(50),
             }],
             timestamp: 1719876768,
         };
@@ -185,12 +188,12 @@ mod test {
             index: 1,
             nonce: 245,
             previous_hash: "7109c0d119501c326c8a613b9d99069caf7372566e5725a72b47cc9d737f304d"
-                .to_string(), // this is incorrect
+                .to_string(),
             transactions: vec![Transaction {
                 sender: "me".to_string(),
                 receiver: "you".to_string(),
                 timestamp: 1719876768,
-                amount: 50,
+                amount: I32F32::from_num(50),
             }],
             timestamp: 1719876768,
         };

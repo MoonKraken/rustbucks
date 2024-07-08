@@ -1,3 +1,4 @@
+use fixed::types::I32F32;
 use rustbucks::{mine::mine_pending_transactions, model::{node::Node, transaction::Transaction}};
 
 #[tokio::test]
@@ -9,13 +10,13 @@ pub async fn two_nodes_with_distinct_blockchains_should_converge() {
             timestamp: 0,
             sender: "Timmy".to_string(),
             receiver: "Bobby".to_string(),
-            amount: 100,
+            amount: I32F32::from_num(100),
         },
         Transaction {
             timestamp: 1,
             sender: "Alice".to_string(),
             receiver: "Charlie".to_string(),
-            amount: 100,
+            amount: I32F32::from_num(100),
         },
     ];
 
@@ -24,7 +25,7 @@ pub async fn two_nodes_with_distinct_blockchains_should_converge() {
             timestamp: 2,
             sender: "Jill".to_string(),
             receiver: "Jane".to_string(),
-            amount: 20,
+            amount: I32F32::from_num(20),
         },
     ];
 
@@ -52,13 +53,13 @@ pub async fn two_nodes_with_distinct_blockchains_should_converge() {
             timestamp: 3,
             sender: "Spock".to_string(),
             receiver: "Kirk".to_string(),
-            amount: 100,
+            amount: I32F32::from_num(100),
         },
         Transaction {
             timestamp: 1,
             sender: "Picard".to_string(),
             receiver: "Janeway".to_string(),
-            amount: 100,
+            amount: I32F32::from_num(100),
         },
     ];
 
