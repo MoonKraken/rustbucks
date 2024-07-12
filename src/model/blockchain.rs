@@ -42,7 +42,7 @@ impl Blockchain {
         let chain = vec![Block {
             index: 0,
             transactions: vec![genesis_transaction],
-            nonce: 0,
+            nonce: 41,
             previous_hash: format!("{:x}", hasher.finalize()),
             timestamp,
         }];
@@ -81,7 +81,7 @@ impl Blockchain {
         self.chain.push(new_block.clone());
         // so we can easily look them up later
         for transaction in new_block.transactions {
-           self.confirmed_transactions.insert(transaction);
+            self.confirmed_transactions.insert(transaction);
         }
 
         Ok(())
@@ -98,11 +98,15 @@ impl Blockchain {
         };
 
         for block in &self.chain[1..] {
-            if block.previous_hash != prev_hash {
+            if !prev_hash.starts_with(&self.target_hash_prefix) || prev_hash != prev_hash {
                 return false;
             }
 
             prev_hash = block.hash();
+        }
+
+        if !prev_hash.starts_with(&self.target_hash_prefix) {
+            return false;
         }
 
         true
@@ -116,6 +120,50 @@ mod test {
     use crate::model::{block::Block, blockchain::BlockchainError, transaction::Transaction};
 
     use super::Blockchain;
+
+    // this is really just to discover the nonce of the first block
+    // should we ever need to update the contents of the block
+    #[test]
+    pub fn discover_nonce_for_first_block() {
+        let chain = Blockchain::new();
+        let mut first_block = chain.chain.first().expect("should have genesis block").clone();
+
+        while !first_block.hash().starts_with(&chain.target_hash_prefix) {
+            first_block.nonce = first_block.nonce + 1;
+        }
+
+        println!("nonce discovered:");
+        dbg!(first_block.nonce);
+    }
+
+    #[test]
+    pub fn is_valid_returns_false_for_chain_with_incorrect_target_prefix() {
+        let mut chain = Blockchain::new();
+        let previous_hash = chain
+            .chain
+            .first()
+            .expect("should have genesis block")
+            .hash();
+
+        let block_with_hash_without_target_prefix = Block {
+            index: 1,
+            nonce: 0,
+            previous_hash,
+            transactions: vec![Transaction {
+                sender: "Billy".to_string(),
+                receiver: "Timmy".to_string(),
+                timestamp: 0,
+                amount: I32F32::from_num(1),
+            }],
+            timestamp: 0,
+        };
+
+        dbg!(block_with_hash_without_target_prefix.hash()); // make sure this doesn't miraculously start with 00
+
+        chain.chain.push(block_with_hash_without_target_prefix);
+
+        assert_eq!(chain.is_valid(), false);
+    }
 
     #[test]
     pub fn is_valid_returns_false_for_chain_with_invalid_hash() {
@@ -140,11 +188,16 @@ mod test {
 
     #[test]
     pub fn should_not_add_invalid_block_invalid_nonce() {
+        let mut chain = Blockchain::new();
+        let previous_hash = chain.chain.first().expect("genesis block").hash();
         let invalid_block = Block {
             index: 1,
+            // there is a chance this nonce will unintentionally yield a correct hash,
+            // but it is unlikely. if this test ever fails
+            // try changing the nonce to something else
+            // and it will probably be fixed
             nonce: 0,
-            previous_hash: "7109c0d119501c326c8a613b9d99069caf7372566e5725a72b47cc9d737f304d"
-                .to_string(), // this is incorrect
+            previous_hash,
             transactions: vec![Transaction {
                 sender: "Billy".to_string(),
                 receiver: "Timmy".to_string(),
@@ -154,7 +207,6 @@ mod test {
             timestamp: 0,
         };
 
-        let mut chain = Blockchain::new();
         let res = chain.add_new_block(invalid_block);
 
         assert_eq!(res, Err(BlockchainError::IncorrectProof));
@@ -184,11 +236,12 @@ mod test {
 
     #[test]
     pub fn should_add_valid_block() {
-        let invalid_block = Block {
+        let mut chain = Blockchain::new();
+        let previous_hash = chain.chain.first().expect("genesis block").hash();
+        let mut valid_block = Block {
             index: 1,
             nonce: 245,
-            previous_hash: "7109c0d119501c326c8a613b9d99069caf7372566e5725a72b47cc9d737f304d"
-                .to_string(),
+            previous_hash,
             transactions: vec![Transaction {
                 sender: "me".to_string(),
                 receiver: "you".to_string(),
@@ -198,8 +251,12 @@ mod test {
             timestamp: 1719876768,
         };
 
-        let mut chain = Blockchain::new();
-        let res = chain.add_new_block(invalid_block);
+        // "mine" for a good nonce
+        while !valid_block.hash().starts_with(&chain.target_hash_prefix) {
+            valid_block.nonce = valid_block.nonce + 1;
+        }
+
+        let res = chain.add_new_block(valid_block);
 
         assert_eq!(res, Ok(()));
     }
