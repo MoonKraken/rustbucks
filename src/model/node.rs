@@ -6,6 +6,7 @@ use super::{
     transaction::Transaction,
 };
 
+#[derive(PartialEq, Debug)]
 pub struct Node {
     pub blockchain: Blockchain,
     pub pending_transactions: HashSet<Transaction>,

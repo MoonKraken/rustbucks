@@ -6,7 +6,7 @@ use sha2::Sha256;
 
 use super::{block::Block, transaction::Transaction};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Blockchain {
     pub chain: Vec<Block>,
 
@@ -22,6 +22,7 @@ pub enum BlockchainError {
     IncorrectProof,
     InvalidIndex,
     PreviousHashDoesNotMatch,
+    EmptyTransactions,
 }
 
 impl Blockchain {
@@ -62,6 +63,10 @@ impl Blockchain {
             .last()
             .expect("could not get last block in chain, this should never happen");
 
+        //make sure transactions isn't empty
+        if new_block.transactions.is_empty() {
+            return Err(BlockchainError::EmptyTransactions);
+        }
         //verify the last block hash is correct
         let last_hash = last.hash();
         if last_hash != new_block.previous_hash {

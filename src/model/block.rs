@@ -2,7 +2,7 @@ use super::transaction::Transaction;
 use sha2::Sha256;
 use sha2::Digest;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Block {
     pub index: u64,
     pub transactions: Vec<Transaction>,
