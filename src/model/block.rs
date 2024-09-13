@@ -12,9 +12,5 @@ pub struct Block {
 }
 
 impl Block {
-    pub fn hash(&self) -> String {
-        let mut hasher = Sha256::new();
-        hasher.update(format!("{:?}", self));
-        format!("{:x}", hasher.finalize())
-    }
+    pub fn hash(&self) -> String {todo!();}
 }

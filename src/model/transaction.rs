@@ -4,6 +4,6 @@ use fixed::types::I32F32;
 pub struct Transaction {
     pub sender: String,
     pub receiver: String,
-    pub amount: I32F32, //no fractions because it's easier that way
+    pub amount: I32F32,
     pub timestamp: i64,
 }

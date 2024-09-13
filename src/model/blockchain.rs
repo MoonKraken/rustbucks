@@ -26,96 +26,16 @@ pub enum BlockchainError {
 }
 
 impl Blockchain {
-    pub fn new() -> Self {
-        let mut hasher = Sha256::new();
-        hasher.update("let there be light");
-        let timestamp = 0;
+    pub fn new() -> Self {todo!();}
 
-        let genesis_transaction = Transaction {
-            sender: "".to_string(),
-            receiver: "".to_string(),
-            amount: I32F32::from_num(0.0),
-            timestamp,
-        };
+    // This receives a newly mined block and does the appropriate validation
+    pub fn add_new_block(&mut self, new_block: Block) -> Result<(), BlockchainError> {todo!();}
 
-        let confirmed_transactions = vec![genesis_transaction.clone()].into_iter().collect();
-
-        let chain = vec![Block {
-            index: 0,
-            transactions: vec![genesis_transaction],
-            nonce: 41,
-            previous_hash: format!("{:x}", hasher.finalize()),
-            timestamp,
-        }];
-
-        Blockchain {
-            chain,
-            target_hash_prefix: "00".to_string(), // pretty low difficulty
-            confirmed_transactions,
-        }
-    }
-
-    //new blocks could originate from those mined on other nodes
-    //or those mined on this node
-    pub fn add_new_block(&mut self, new_block: Block) -> Result<(), BlockchainError> {
-        let last = self
-            .chain
-            .last()
-            .expect("could not get last block in chain, this should never happen");
-
-        //make sure transactions isn't empty
-        if new_block.transactions.is_empty() {
-            return Err(BlockchainError::EmptyTransactions);
-        }
-        //verify the last block hash is correct
-        let last_hash = last.hash();
-        if last_hash != new_block.previous_hash {
-            return Err(BlockchainError::PreviousHashDoesNotMatch);
-        }
-
-        // verify that the hash of the block hash the target prefix
-        if !new_block.hash().starts_with(&self.target_hash_prefix) {
-            return Err(BlockchainError::IncorrectProof); // somebody gave tried giving us a bad block
-        }
-
-        //verify the index is correct
-        if new_block.index != last.index + 1 {
-            return Err(BlockchainError::InvalidIndex);
-        }
-
-        self.chain.push(new_block.clone());
-        // so we can easily look them up later
-        for transaction in new_block.transactions {
-            self.confirmed_transactions.insert(transaction);
-        }
-
-        Ok(())
-    }
-
+    // Validate the entire blockchain
     // things to validate
     // 1. Previous hash matches actual hash of previous block
     // 2. Hashes all have the target prefix
-    pub fn is_valid(&self) -> bool {
-        let mut prev_hash = if let Some(first) = self.chain.first() {
-            first.hash()
-        } else {
-            return false;
-        };
-
-        for block in &self.chain[1..] {
-            if !prev_hash.starts_with(&self.target_hash_prefix) || prev_hash != prev_hash {
-                return false;
-            }
-
-            prev_hash = block.hash();
-        }
-
-        if !prev_hash.starts_with(&self.target_hash_prefix) {
-            return false;
-        }
-
-        true
-    }
+    pub fn is_valid(&self) -> bool {todo!();}
 }
 
 #[cfg(test)]
